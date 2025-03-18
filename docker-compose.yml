@@ -27,9 +27,22 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PORT: 5432
     ports:
-      - "8000:8000" # Adjust port mapping as needed
+      - "5534:8000"
     depends_on:
       - postgres
+
+  ui:
+    build:
+      context: ../tournament-prediction-ui
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_PREDICTOR_API_URL=${REACT_APP_PREDICTOR_API_URL}
+    container_name: predictor_ui
+    restart: always
+    ports:
+      - "2821:80"
+    depends_on:
+      - api
 
 volumes:
   postgres_data:
