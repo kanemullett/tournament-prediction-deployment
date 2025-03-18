@@ -27,7 +27,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PORT: 5432
     ports:
-      - "8000:8000" # Adjust port mapping as needed
+      - "5534:8000"
     depends_on:
       - postgres
 
