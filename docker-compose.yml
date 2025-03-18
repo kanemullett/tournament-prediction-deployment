@@ -31,6 +31,19 @@ services:
     depends_on:
       - postgres
 
+  ui:
+    build:
+      context: ../tournament-prediction-ui
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_PREDICTOR_API_URL=${REACT_APP_PREDICTOR_API_URL}
+    container_name: predictor_ui
+    restart: always
+    ports:
+      - "2821:80"
+    depends_on:
+      - api
+
 volumes:
   postgres_data:
     driver: local
