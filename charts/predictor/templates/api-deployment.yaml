@@ -22,7 +22,7 @@ spec:
             - configMapRef:
                 name: {{ include "predictor.fullname" . }}-api
             - secretRef:
-                name: {{ include "predictor.fullname" . }}-api
+                name: {{ .Values.api.secret.name | quote }}
           livenessProbe:
             httpGet:
               path: /healthz
