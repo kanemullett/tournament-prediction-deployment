@@ -12,8 +12,8 @@ api:
     CORS_ORIGINS: "http://localhost:2821"
 
   secret:
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: postgres
+    POSTGRES_USER: ""
+    POSTGRES_PASSWORD: ""
 
 ui:
   image:
