@@ -1,0 +1,33 @@
+api:
+  image:
+    repository: ghcr.io/kanemullett/api
+    tag: latest
+  port: 5534
+  replicas: 1
+
+  env:
+    POSTGRES_HOST: db
+    POSTGRES_PORT: "5432"
+    POSTGRES_DB: predictor
+    CORS_ORIGINS: "http://localhost:2821"
+
+  secret:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+
+ui:
+  image:
+    repository: ghcr.io/kanemullett/ui
+    tag: latest
+  containerPort: 80
+  replicas: 1
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    ui: yourdomain.com
+    api: api.yourdomain.com
+  tls:
+    enabled: false
+    secretName: predictor-tls

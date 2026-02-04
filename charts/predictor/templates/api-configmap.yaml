@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "predictor.fullname" . }}-api
+data:
+  POSTGRES_HOST: {{ .Values.api.env.POSTGRES_HOST | quote }}
+  POSTGRES_PORT: {{ .Values.api.env.POSTGRES_PORT | quote }}
+  POSTGRES_DB: {{ .Values.api.env.POSTGRES_DB | quote }}
+  CORS_ORIGINS: {{ .Values.api.env.CORS_ORIGINS | quote }}
