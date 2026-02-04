@@ -26,8 +26,8 @@ ingress:
   enabled: true
   className: nginx
   hosts:
-    ui: yourdomain.com
-    api: api.yourdomain.com
+    ui: providentia.kanemullett.com
+    api: api.providentia.kanemullett.com
   tls:
     enabled: false
     secretName: predictor-tls
