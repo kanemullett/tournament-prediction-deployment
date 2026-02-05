@@ -1,0 +1,27 @@
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    ui: providentia.kanemullett.com
+    api: api.providentia.kanemullett.com
+  tls:
+    enabled: false
+
+api:
+  image:
+    repository: ghcr.io/kanemullett/api
+    tag: latest
+  env:
+    POSTGRES_HOST: private-providentia-db-do-user-32942855-0.f.db.ondigitalocean.com
+    POSTGRES_PORT: "25060"
+    POSTGRES_DB: defaultdb
+    POSTGRES_SSLMODE: require
+    # Optional: tighten CORS for prod
+    # CORS_ORIGINS: "https://providentia.kanemullett.com"
+  secretRef:
+    name: predictor-api-secret
+
+ui:
+  image:
+    repository: ghcr.io/kanemullett/ui
+    tag: latest
