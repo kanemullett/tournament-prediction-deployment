@@ -9,7 +9,7 @@ api:
     POSTGRES_HOST: db
     POSTGRES_PORT: "5432"
     POSTGRES_DB: predictor
-    CORS_ORIGINS: "http://localhost:2821"
+    CORS_ORIGINS: "https://providentia.kanemullett.com,http://providentia.kanemullett.com"
 
   secret:
     create: false
@@ -26,8 +26,10 @@ ingress:
   enabled: true
   className: nginx
   hosts:
-    ui: yourdomain.com
-    api: api.yourdomain.com
+    ui: providentia.kanemullett.com
+    api: api.providentia.kanemullett.com
   tls:
-    enabled: false
-    secretName: predictor-tls
+    enabled: true
+    secretName: providentia-tls
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
