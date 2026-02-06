@@ -5,7 +5,10 @@ ingress:
     ui: providentia.kanemullett.com
     api: api.providentia.kanemullett.com
   tls:
-    enabled: false
+    enabled: true
+    secretName: providentia-tls
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 
 api:
   image:
@@ -17,7 +20,7 @@ api:
     POSTGRES_DB: defaultdb
     POSTGRES_SSLMODE: require
     # Optional: tighten CORS for prod
-    # CORS_ORIGINS: "https://providentia.kanemullett.com"
+    CORS_ORIGINS: "https://providentia.kanemullett.com,http://providentia.kanemullett.com"
   secretRef:
     name: predictor-api-secret
 
