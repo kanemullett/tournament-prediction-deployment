@@ -20,7 +20,7 @@ api:
     POSTGRES_DB: defaultdb
     POSTGRES_SSLMODE: require
     # Optional: tighten CORS for prod
-    CORS_ORIGINS: "https://providentia.kanemullett.com,http://providentia.kanemullett.com"
+    CORS_ORIGINS: "https://providentia.kanemullett.com,http://providentia.kanemullett.com,http://localhost:3000,http://127.0.0.1:3000"
   secretRef:
     name: predictor-api-secret
 
