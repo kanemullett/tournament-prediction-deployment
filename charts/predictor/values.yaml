@@ -9,7 +9,7 @@ api:
     POSTGRES_HOST: db
     POSTGRES_PORT: "5432"
     POSTGRES_DB: predictor
-    CORS_ORIGINS: "https://providentia.kanemullett.com,http://providentia.kanemullett.com"
+    CORS_ORIGINS: "https://providentia.kanemullett.com,http://providentia.kanemullett.com,http://localhost:3000,http://127.0.0.1:3000"
 
   secret:
     create: false
