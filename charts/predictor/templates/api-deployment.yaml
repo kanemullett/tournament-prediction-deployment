@@ -15,23 +15,37 @@ spec:
       containers:
         - name: api
           image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.api.port }}
+            - name: http
+              containerPort: {{ .Values.api.port }}
           envFrom:
             - configMapRef:
                 name: {{ include "predictor.fullname" . }}-api
             - secretRef:
+                {{- if .Values.api.secret.create }}
+                name: {{ include "predictor.fullname" . }}-api
+                {{- else }}
                 name: {{ .Values.api.secret.name | quote }}
+                {{- end }}
+          {{- with .Values.api.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          # Covers JVM startup and Flyway migrations; liveness/readiness only start once this passes.
+          startupProbe:
+            httpGet:
+              path: /livez
+              port: http
+            periodSeconds: 5
+            failureThreshold: 36
           livenessProbe:
             httpGet:
-              path: /healthz
-              port: {{ .Values.api.port }}
-            initialDelaySeconds: 10
+              path: /livez
+              port: http
             periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /readyz
-              port: {{ .Values.api.port }}
-            initialDelaySeconds: 10
+              port: http
             periodSeconds: 10

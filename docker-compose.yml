@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   postgres:
     image: postgres:15 # Use the desired PostgreSQL version
@@ -13,6 +11,10 @@ services:
       - "7235:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data # Persist data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 10
 
   api:
     build:
@@ -26,10 +28,14 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PORT: 5432
+      # The UI container (2821) and the UI dev server (npm start, 3000).
+      CORS_ORIGINS: http://localhost:2821,http://localhost:3000
     ports:
       - "5534:8000"
     depends_on:
-      - postgres
+      postgres:
+        # Flyway migrates at startup, so the API needs Postgres to be accepting connections.
+        condition: service_healthy
 
   ui:
     build:
