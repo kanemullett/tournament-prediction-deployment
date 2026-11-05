@@ -6,4 +6,7 @@ data:
   POSTGRES_HOST: {{ .Values.api.env.POSTGRES_HOST | quote }}
   POSTGRES_PORT: {{ .Values.api.env.POSTGRES_PORT | quote }}
   POSTGRES_DB: {{ .Values.api.env.POSTGRES_DB | quote }}
+  {{- with .Values.api.env.POSTGRES_SSLMODE }}
+  POSTGRES_SSLMODE: {{ . | quote }}
+  {{- end }}
   CORS_ORIGINS: {{ .Values.api.env.CORS_ORIGINS | quote }}
