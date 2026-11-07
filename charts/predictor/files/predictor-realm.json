@@ -1,0 +1,105 @@
+{
+  "realm": "predictor",
+  "displayName": "Providentia",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "bruteForceProtected": true,
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "roles": {
+    "realm": [
+      {
+        "name": "player",
+        "description": "Can join groups and submit predictions."
+      },
+      {
+        "name": "admin",
+        "description": "Can manage tournaments, fixtures and results."
+      },
+      {
+        "name": "offline_access",
+        "description": "${role_offline-access}"
+      },
+      {
+        "name": "uma_authorization",
+        "description": "${role_uma_authorization}"
+      },
+      {
+        "name": "default-roles-predictor",
+        "description": "Roles every new user gets.",
+        "composite": true,
+        "composites": {
+          "realm": ["offline_access", "uma_authorization", "player"],
+          "client": {
+            "account": ["view-profile", "manage-account"]
+          }
+        }
+      }
+    ]
+  },
+  "defaultRole": {
+    "name": "default-roles-predictor"
+  },
+  "clients": [
+    {
+      "clientId": "predictor-ui",
+      "name": "Providentia UI",
+      "description": "The React single-page app. Public client using the authorization code flow with PKCE. Also used by the API's Swagger UI login.",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "frontchannelLogout": true,
+      "rootUrl": "${PREDICTOR_UI_URL}",
+      "baseUrl": "/",
+      "redirectUris": [
+        "${PREDICTOR_UI_URL}/*",
+        "${PREDICTOR_UI_DEV_URL}/*",
+        "${PREDICTOR_API_URL}/swagger-ui/oauth2-redirect.html"
+      ],
+      "webOrigins": ["${PREDICTOR_UI_URL}", "${PREDICTOR_UI_DEV_URL}", "${PREDICTOR_API_URL}"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "${PREDICTOR_UI_URL}/*##${PREDICTOR_UI_DEV_URL}/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "predictor-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "predictor-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "predictor-api",
+      "name": "Providentia API",
+      "description": "The Spring Boot resource server. Only the audience that access tokens carry; it never logs users in itself.",
+      "enabled": true,
+      "publicClient": false,
+      "bearerOnly": false,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false
+    }
+  ]
+}

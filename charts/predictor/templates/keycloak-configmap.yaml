@@ -1,0 +1,26 @@
+{{- if .Values.keycloak.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "predictor.fullname" . }}-keycloak
+data:
+  KC_DB: postgres
+  KC_DB_URL: {{ printf "jdbc:postgresql://%s:%v/%s%s" .Values.keycloak.db.host .Values.keycloak.db.port .Values.keycloak.db.database (ternary (printf "?sslmode=%s" .Values.keycloak.db.sslmode) "" (ne .Values.keycloak.db.sslmode "")) | quote }}
+  # Public URL; fixes the token issuer and every link Keycloak generates.
+  KC_HOSTNAME: {{ include "predictor.keycloakUrl" . | quote }}
+  {{- with .Values.keycloak.hostnameAdmin }}
+  # Where the admin console is served from, when it isn't on the public host.
+  KC_HOSTNAME_ADMIN: {{ . | quote }}
+  {{- end }}
+  # Lets in-cluster callers (the API fetching signing keys) use the service name.
+  KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+  # TLS ends at the ingress, which forwards X-Forwarded-* headers.
+  KC_HTTP_ENABLED: "true"
+  KC_PROXY_HEADERS: xforwarded
+  KC_HEALTH_ENABLED: "true"
+  # Filled into the realm import's redirect URIs and web origins.
+  PREDICTOR_UI_URL: {{ include "predictor.uiUrl" . | quote }}
+  PREDICTOR_UI_DEV_URL: {{ default (include "predictor.uiUrl" .) .Values.keycloak.uiDevUrl | quote }}
+  # For logging in from the API's Swagger UI.
+  PREDICTOR_API_URL: {{ include "predictor.apiUrl" . | quote }}
+{{- end }}

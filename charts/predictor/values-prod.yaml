@@ -4,6 +4,7 @@ ingress:
   hosts:
     ui: providentia.kanemullett.com
     api: api.providentia.kanemullett.com
+    auth: auth.providentia.kanemullett.com
   tls:
     enabled: true
     secretName: providentia-tls
@@ -28,3 +29,15 @@ ui:
   image:
     repository: ghcr.io/kanemullett/ui
     tag: latest
+
+keycloak:
+  # Off until the production setup in the README is done (keycloak database, DNS, secret).
+  enabled: false
+  # Same managed Postgres cluster as the API, in its own database.
+  db:
+    host: private-providentia-db-do-user-32942855-0.f.db.ondigitalocean.com
+    port: 25060
+    database: keycloak
+    sslmode: require
+  secret:
+    name: predictor-keycloak-secret
