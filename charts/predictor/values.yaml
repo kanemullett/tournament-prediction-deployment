@@ -36,12 +36,53 @@ ui:
   containerPort: 80
   replicas: 1
 
+keycloak:
+  enabled: true
+  image:
+    repository: quay.io/keycloak/keycloak
+    tag: "26.4"
+    pullPolicy: IfNotPresent
+  # Keep at 1 unless you've checked Keycloak's clustering/caching setup for multiple pods.
+  replicas: 1
+  # Must match "realm" in files/predictor-realm.json.
+  realm: predictor
+  # Extra UI origin allowed to log in (e.g. the React dev server). Defaults to the UI host only.
+  uiDevUrl: ""
+
+  db:
+    host: db
+    port: 5432
+    database: keycloak
+    # Appended to the JDBC URL when set, e.g. require.
+    sslmode: ""
+
+  # Created out-of-band by scripts/create-secrets.sh. Holds KC_DB_USERNAME, KC_DB_PASSWORD,
+  # KC_BOOTSTRAP_ADMIN_USERNAME and KC_BOOTSTRAP_ADMIN_PASSWORD.
+  secret:
+    name: predictor-keycloak-secret
+
+  ingress:
+    # Routes /admin/ publicly. Without it, only /realms/ and /resources/ are reachable.
+    exposeAdmin: true
+    tlsSecretName: providentia-auth-tls
+  # Admin console URL when it's not exposed publicly, e.g. http://localhost:8180 for
+  # `kubectl port-forward svc/predictor-keycloak 8180:80`. Empty means the public host.
+  hostnameAdmin: ""
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 768Mi
+    limits:
+      memory: 1Gi
+
 ingress:
   enabled: true
   className: nginx
   hosts:
     ui: providentia.kanemullett.com
     api: api.providentia.kanemullett.com
+    auth: auth.providentia.kanemullett.com
   tls:
     enabled: true
     secretName: providentia-tls

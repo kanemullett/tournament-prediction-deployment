@@ -30,11 +30,18 @@ services:
       POSTGRES_PORT: 5432
       # The UI container (2821) and the UI dev server (npm start, 3000).
       CORS_ORIGINS: http://localhost:2821,http://localhost:3000
+      # Tokens are issued for the browser-facing Keycloak URL, so that's the issuer to check.
+      # Signing keys are fetched over the compose network instead, since localhost:8180
+      # inside this container is the API itself.
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8180/realms/predictor
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/predictor/protocol/openid-connect/certs
     ports:
       - "5534:8000"
     depends_on:
       postgres:
         # Flyway migrates at startup, so the API needs Postgres to be accepting connections.
+        condition: service_healthy
+      keycloak:
         condition: service_healthy
 
   ui:
@@ -50,6 +57,59 @@ services:
     depends_on:
       - api
 
+  keycloak-db:
+    image: postgres:15
+    container_name: predictor_keycloak_database
+    restart: always
+    environment:
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+      POSTGRES_DB: keycloak
+    volumes:
+      - keycloak_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 5s
+      retries: 10
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4
+    container_name: predictor_keycloak
+    restart: always
+    # Dev mode: HTTP, no build step, relaxed hostname checks. Imports the realm on first start
+    # and leaves it alone afterwards, so changes made in the admin console survive restarts.
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      # Fix the issuer to the browser-facing URL so tokens look the same however Keycloak is reached.
+      KC_HOSTNAME: http://localhost:8180
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HEALTH_ENABLED: "true"
+      # Filled into the realm import's redirect URIs and web origins.
+      PREDICTOR_UI_URL: http://localhost:2821
+      PREDICTOR_UI_DEV_URL: http://localhost:3000
+      # For logging in from the API's Swagger UI.
+      PREDICTOR_API_URL: http://localhost:5534
+    volumes:
+      - ./charts/predictor/files/predictor-realm.json:/opt/keycloak/data/import/predictor-realm.json:ro
+    ports:
+      - "8180:8080"
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    healthcheck:
+      # The image has no curl, so talk HTTP to the management port with bash.
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && printf 'GET /health/ready HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '200 OK' <&3"]
+      interval: 10s
+      retries: 30
+
 volumes:
   postgres_data:
+    driver: local
+  keycloak_data:
     driver: local

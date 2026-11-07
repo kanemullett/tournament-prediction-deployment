@@ -1,0 +1,9 @@
+{{- if .Values.keycloak.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "predictor.fullname" . }}-keycloak-realm
+data:
+  predictor-realm.json: |-
+    {{- .Files.Get "files/predictor-realm.json" | nindent 4 }}
+{{- end }}

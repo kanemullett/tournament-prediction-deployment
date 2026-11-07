@@ -10,3 +10,8 @@ data:
   POSTGRES_SSLMODE: {{ . | quote }}
   {{- end }}
   CORS_ORIGINS: {{ .Values.api.env.CORS_ORIGINS | quote }}
+  {{- if .Values.keycloak.enabled }}
+  # Check tokens were issued by the public Keycloak URL, but fetch signing keys in-cluster.
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: {{ printf "%s/realms/%s" (include "predictor.keycloakUrl" .) .Values.keycloak.realm | quote }}
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: {{ printf "http://%s-keycloak/realms/%s/protocol/openid-connect/certs" (include "predictor.fullname" .) .Values.keycloak.realm | quote }}
+  {{- end }}
